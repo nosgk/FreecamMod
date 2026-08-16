@@ -18,8 +18,8 @@ add_library(${PROJECT_NAME} SHARED
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-# 源码以 UTF-8 编码（含中文字符串字面量），MSVC 需显式指定
-target_compile_options(${PROJECT_NAME} PRIVATE /utf-8)
+# 源码以 UTF-8 编码（含中文字符串字面量），MSVC 需显式指定；仅作用于 C/C++，避免 MASM 警告
+target_compile_options(${PROJECT_NAME} PRIVATE "$<$<COMPILE_LANGUAGE:C,CXX>:/utf-8>")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     extern::all

@@ -174,7 +174,7 @@ void GUI::SubscribeEvents() {
     );
     EventBus::Subscribe<Event::FrameStepped>([this](const Event::FrameStepped& event) {
         if (notifyFrameStepped)
-            NotificationPopUp::Notify(I18N::TR("notif.Info"), std::format(I18N::TR("{} frames stepped"), event.framesStepped));
+            NotificationPopUp::Notify(I18N::TR("notif.Info"), std::vformat(I18N::TR("{} frames stepped"), std::make_format_args(event.framesStepped)));
         }
     );
     EventBus::Subscribe<Event::ToggleCycleWeatherTime>([this](const Event::ToggleCycleWeatherTime& event) {
@@ -194,7 +194,7 @@ void GUI::SubscribeEvents() {
     );
     EventBus::Subscribe<Event::SaveState>([this](const Event::SaveState& event) {
         if (notifySaveState)
-            NotificationPopUp::Notify(I18N::TR("notif.Info"), std::format(I18N::TR("Saved state [{}], position = ({:.2f}, {:.2f}, {:.2f})"), event.slot, event.pos.x, event.pos.y, event.pos.z));
+            NotificationPopUp::Notify(I18N::TR("notif.Info"), std::vformat(I18N::TR("Saved state [{}], position = ({:.2f}, {:.2f}, {:.2f})"), std::make_format_args(event.slot, event.pos.x, event.pos.y, event.pos.z)));
         }
     );
     EventBus::Subscribe<Event::Interpolate>([this](const Event::Interpolate& event) {
@@ -205,12 +205,12 @@ void GUI::SubscribeEvents() {
             slotsStr += std::to_string(event.slots[i]);
         }
         slotsStr += "]";
-        NotificationPopUp::Notify(I18N::TR("notif.Info"), event.isEnabled ? std::format(I18N::TR("Interpolation started between states = {}"), slotsStr) : I18N::TR("Interpolation ended"));
+        NotificationPopUp::Notify(I18N::TR("notif.Info"), event.isEnabled ? std::vformat(I18N::TR("Interpolation started between states = {}"), std::make_format_args(slotsStr)) : I18N::TR("Interpolation ended"));
         }
     );
     EventBus::Subscribe<Event::StateQueued>([this](const Event::StateQueued& event) {
         if (notifyStateQueued)
-            NotificationPopUp::Notify(I18N::TR("notif.Info"), std::format(I18N::TR("State [{}] queued"), event.slot));
+            NotificationPopUp::Notify(I18N::TR("notif.Info"), std::vformat(I18N::TR("State [{}] queued"), std::make_format_args(event.slot)));
         }
     );
 }
