@@ -1,8 +1,8 @@
 {
   "_说明": "FreecamMod 中文汉化映射表（zh-CN）。键为程序内英文原文，值为简体中文译文。ConVar 配置项使用 \"段落.键名\" 复合键。修改后重启游戏生效。",
 
-  "window.title": "Freecam 自由视角 v1.11-cn.1",
-  "About.version": "v1.11-cn.1",
+  "window.title": "Freecam 自由视角 v1.20.1-cn.1",
+  "About.version": "v1.20.1-cn.1",
   "Info": "信息",
   "Features": "功能",
   "Sequencer": "关键帧动画",
