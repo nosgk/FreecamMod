@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include "utils/debug.h"
+#include "gui/i18n.h"
 
 #include "imgui.h"
 
@@ -131,27 +132,29 @@ public:
     }
 
     void Render() override {
+        const char* label = I18N::TR(section, name);
+
         if constexpr (std::is_same_v<T, bool>) {
             bool v = value;
-            if (ImGui::Checkbox(name, &v)) {
+            if (ImGui::Checkbox(label, &v)) {
                 SetValueFromUI(v);
             }
         }
         else if constexpr (std::is_same_v<T, int>) {
             int v = value;
             if (minValue && maxValue) {
-                if (ImGui::SliderInt(name, &v, *minValue, *maxValue)) {
+                if (ImGui::SliderInt(label, &v, *minValue, *maxValue)) {
                     SetValueFromUI(v);
                 }
             }
             else if (minValue) {
-                if (ImGui::InputInt(name, &v)) {
+                if (ImGui::InputInt(label, &v)) {
                     if (v < *minValue) v = *minValue;
                     SetValueFromUI(v);
                 }
             }
             else {
-                if (ImGui::InputInt(name, &v)) {
+                if (ImGui::InputInt(label, &v)) {
                     SetValueFromUI(v);
                 }
             }
@@ -159,12 +162,12 @@ public:
         else if constexpr (std::is_same_v<T, float>) {
             float v = value;
             if (minValue && maxValue) {
-                if (ImGui::SliderFloat(name, &v, *minValue, *maxValue)) {
+                if (ImGui::SliderFloat(label, &v, *minValue, *maxValue)) {
                     SetValueFromUI(v);
                 }
             }
             else {
-                if (ImGui::InputFloat(name, &v)) {
+                if (ImGui::InputFloat(label, &v)) {
                     SetValueFromUI(v);
                 }
             }

@@ -6,10 +6,14 @@
 
 #include "core/events.h"
 #include "core/config/config.h"
+#include "gui/i18n.h"
 #include "gui/notification_popup.h"
 #include "hook/hook_manager.h"
   
 void GUI::Initialize() {
+    // 汉化：加载中文映射表与中文字体（必须在 io.Fonts->Build() 之前）
+    I18N::Initialize(cfg.GetConfigDirPath());
+
     is_visible = showMenuOnStartup;
     is_cursor_visible = showMenuOnStartup;
 
@@ -160,37 +164,37 @@ void GUI::SubscribeEvents() {
 
     EventBus::Subscribe<Event::ToggleFreecam>([this](const Event::ToggleFreecam& event) {
         if (notifyFreecam)
-            NotificationPopUp::Notify("Info", event.isEnabled ? "Free camera enabled" : "Free camera disabled");
+            NotificationPopUp::Notify(I18N::TR("notif.Info"), event.isEnabled ? I18N::TR("Free camera enabled") : I18N::TR("Free camera disabled"));
         }
     );
     EventBus::Subscribe<Event::ToggleSpeedhack>([this](const Event::ToggleSpeedhack& event) {
         if (notifySpeedhack)
-            NotificationPopUp::Notify("Info", event.isEnabled ? "Speedhack enabled" : "Speedhack disabled");
+            NotificationPopUp::Notify(I18N::TR("notif.Info"), event.isEnabled ? I18N::TR("Speedhack enabled") : I18N::TR("Speedhack disabled"));
         }
     );
     EventBus::Subscribe<Event::FrameStepped>([this](const Event::FrameStepped& event) {
         if (notifyFrameStepped)
-            NotificationPopUp::Notify("Info", std::format("{} frames stepped", event.framesStepped));
+            NotificationPopUp::Notify(I18N::TR("notif.Info"), std::format(I18N::TR("{} frames stepped"), event.framesStepped));
         }
     );
     EventBus::Subscribe<Event::ToggleCycleWeatherTime>([this](const Event::ToggleCycleWeatherTime& event) {
         if (notifyCycleWeatherTime)
-            NotificationPopUp::Notify("Info", event.isEnabled ? "Started cycling weather time" : "Finished cycling weather time");
+            NotificationPopUp::Notify(I18N::TR("notif.Info"), event.isEnabled ? I18N::TR("Started cycling weather time") : I18N::TR("Finished cycling weather time"));
         }
     );
     EventBus::Subscribe<Event::Record>([this](const Event::Record& event) {
         if (notifyRecord)
-            NotificationPopUp::Notify("Info", event.isEnabled ? "Started recording" : "Finished recording");
+            NotificationPopUp::Notify(I18N::TR("notif.Info"), event.isEnabled ? I18N::TR("Started recording") : I18N::TR("Finished recording"));
         }
     );
     EventBus::Subscribe<Event::PlayRecord>([this](const Event::PlayRecord& event) {
         if (notifyPlayRecord)
-            NotificationPopUp::Notify("Info", event.isEnabled ? "Started playing recording" : "Finished playing recording");
+            NotificationPopUp::Notify(I18N::TR("notif.Info"), event.isEnabled ? I18N::TR("Started playing recording") : I18N::TR("Finished playing recording"));
         }
     );
     EventBus::Subscribe<Event::SaveState>([this](const Event::SaveState& event) {
         if (notifySaveState)
-            NotificationPopUp::Notify("Info", std::format("Saved state [{}], position = ({:.2f}, {:.2f}, {:.2f})", event.slot, event.pos.x, event.pos.y, event.pos.z));
+            NotificationPopUp::Notify(I18N::TR("notif.Info"), std::format(I18N::TR("Saved state [{}], position = ({:.2f}, {:.2f}, {:.2f})"), event.slot, event.pos.x, event.pos.y, event.pos.z));
         }
     );
     EventBus::Subscribe<Event::Interpolate>([this](const Event::Interpolate& event) {
@@ -201,12 +205,12 @@ void GUI::SubscribeEvents() {
             slotsStr += std::to_string(event.slots[i]);
         }
         slotsStr += "]";
-        NotificationPopUp::Notify("Info", event.isEnabled ? std::format("Interpolation started between states = {}", slotsStr) : "Interpolation ended");
+        NotificationPopUp::Notify(I18N::TR("notif.Info"), event.isEnabled ? std::format(I18N::TR("Interpolation started between states = {}"), slotsStr) : I18N::TR("Interpolation ended"));
         }
     );
     EventBus::Subscribe<Event::StateQueued>([this](const Event::StateQueued& event) {
         if (notifyStateQueued)
-            NotificationPopUp::Notify("Info", std::format("State [{}] queued", event.slot));
+            NotificationPopUp::Notify(I18N::TR("notif.Info"), std::format(I18N::TR("State [{}] queued"), event.slot));
         }
     );
 }

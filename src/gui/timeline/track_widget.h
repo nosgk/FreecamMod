@@ -3,6 +3,7 @@
 #include "gui/timeline/keyframes_editor.h"
 #include "gui/timeline/timeline_config.h"
 #include "gui/helpers.h"
+#include "gui/i18n.h"
 #include "core/timeline/track.h"
 
 template<typename T>
@@ -64,12 +65,12 @@ public:
         if (ImGui::Button("+")) {
             track.AddKeyframe(time);
         }
-		ImHelpers::Tooltip("Add keyframe");
+		ImHelpers::Tooltip(I18N::TR("Add keyframe"));
 
         ImGui::SameLine();
 
         T data = track.GetData();
-        if (TrackEditor<T>::DrawValue(name, data)) {
+        if (TrackEditor<T>::DrawValue(I18N::TR(name.c_str()), data)) {
             track.SetData(data);
             track.AddKeyframe(time);
             track.WriteCameraValue(camera, data);

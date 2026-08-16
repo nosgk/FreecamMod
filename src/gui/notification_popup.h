@@ -43,7 +43,7 @@ public:
         bool p_open = true;
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, alpha);
         if (ImGui::Begin(header.c_str(), &p_open, window_flags)) {
-            ImGui::Text(message.c_str());
+            ImGui::Text("%s", message.c_str());
 
             // Notification progress bar
 /*            {

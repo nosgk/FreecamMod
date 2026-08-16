@@ -1,5 +1,6 @@
 #include "gui/timeline/timeline_window.h"
 #include "gui/helpers.h"
+#include "gui/i18n.h"
 #include "core/config/config.h"
 #include "core/input/input.h"
 #include "core/input/action_system.h"
@@ -34,7 +35,7 @@ void TimelineWindow::Render() {
         }
     }
 
-    std::string title = "Timeline " + TimeToString(time, TimeFormat::MINUTES_SECONDS_MILLISECONDS);
+    std::string title = std::string(I18N::TR("Timeline")) + " " + TimeToString(time, TimeFormat::MINUTES_SECONDS_MILLISECONDS);
     ImGui::Begin((title + "###timeline").c_str(), &is_visible, is_mouse_under_titlebar ? ImGuiWindowFlags_NoMove : 0);
 
 	is_mouse_under_titlebar = ImGui::GetCursorScreenPos().y < ImGui::GetMousePos().y;
@@ -48,14 +49,14 @@ void TimelineWindow::Render() {
         if (ImGui::Button("+##add_all") || actionMgr.IsJustPressed(ActionType::TimelineAddAllKeyframes)) {
             timeline.AddAllKeyframes(time);
         }
-		ImHelpers::TooltipWithShortcut("Add all keyframes", config.GetKeybindString(ActionType::TimelineAddAllKeyframes).c_str());
+		ImHelpers::TooltipWithShortcut(I18N::TR("Add all keyframes"), config.GetKeybindString(ActionType::TimelineAddAllKeyframes).c_str());
 
         ImGui::SameLine();
 
-        if (ImGui::Button(is_playing ? "Pause" : "Play", ImVec2(ImGui::GetContentRegionAvail().x - spacing, 0)) || (actionMgr.IsJustPressed(ActionType::TimelinePlayPause) && isTimelineInput)) {
+        if (ImGui::Button(is_playing ? I18N::TR("Pause") : I18N::TR("Play"), ImVec2(ImGui::GetContentRegionAvail().x - spacing, 0)) || (actionMgr.IsJustPressed(ActionType::TimelinePlayPause) && isTimelineInput)) {
             is_playing ? timeline.StopPlay() : timeline.Play();
         }
-        ImHelpers::TooltipWithShortcut("Play/Pause", config.GetKeybindString(ActionType::TimelinePlayPause).c_str());
+        ImHelpers::TooltipWithShortcut(I18N::TR("Play/Pause"), config.GetKeybindString(ActionType::TimelinePlayPause).c_str());
         ImGui::EndChild();
 
         auto* camera = freeCamera.GetCameraState();
