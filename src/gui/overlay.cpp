@@ -221,6 +221,12 @@ namespace Overlay {
 
         ImGui::Render();
 
+        // 界面隐藏且无通知时没有任何绘制数据：跳过整段 DX12 提交
+        //（围栏等待/命令分配器重置/资源屏障/命令列表执行），
+        // 完全不触碰后台缓冲区，对游戏画面与帧率零干扰
+        ImDrawData* draw_data = ImGui::GetDrawData();
+        if (!draw_data || draw_data->TotalVtxCount == 0) return;
+
         UINT back_buffer_idx = DX12Hook::g_swap_chain->GetCurrentBackBufferIndex();
         FrameContext* frame_context = &g_frame_contexts[back_buffer_idx];
         if (g_fence->GetCompletedValue() < frame_context->fence_value) {

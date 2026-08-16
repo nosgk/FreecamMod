@@ -25,6 +25,19 @@ namespace Layout {
     }
 }
 
+namespace {
+    // 分节说明：绿色小字（zh-CN.json 中存在该 ".desc" 键时才显示）
+    void SectionDesc(const char* key) {
+        if (!I18N::IsChineseReady() || !I18N::Has(key)) return;
+        ImGui::Spacing();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.42f, 0.78f, 0.45f, 1.0f));
+        ImGui::SetWindowFontScale(0.85f);
+        ImGui::TextWrapped("%s", I18N::TR(key));
+        ImGui::SetWindowFontScale(1.0f);
+        ImGui::PopStyleColor();
+    }
+}
+
 namespace ImGui {
     static inline void BeginScrollableArea(const char* str_id) {
         ImGui::SetCursorPosX(0);
@@ -74,7 +87,7 @@ void MenuWindow::InfoTab::Render() {
             ImGui::Spacing();
             ImGui::SeparatorText(I18N::TR("About"));
 
-            ImGui::BulletText("Freecam v2.0.0");
+            ImGui::BulletText("Freecam %s", I18N::TR("About.version"));
             ImGui::BulletText(I18N::TR("Build date: %s"), __DATE__);
 
             ImGui::BulletText("%s", I18N::TR("Wiki & docs: "));
@@ -243,6 +256,7 @@ void MenuWindow::FeaturesTab::RenderSpeedhack() {
         ImGui::EndDisabled();
 
         ImGui::PopItemWidth();
+        SectionDesc("Speedhack.desc");
         ImGui::Spacing();
     }
 }
@@ -271,6 +285,7 @@ void MenuWindow::FeaturesTab::RenderFrameStepper() {
             IConVar::anyChangeByUi = true;
         }
         ImGui::PopItemWidth();
+        SectionDesc("Frame stepper.desc");
         ImGui::Spacing();
     }
 }
@@ -302,6 +317,7 @@ void MenuWindow::FeaturesTab::RenderCycleWeatherTime() {
             ImGui::DragInt(I18N::TR("Cycle speed"), cycleSpeed, 1000);
         }
         ImGui::PopItemWidth();
+        SectionDesc("Cycle Weather Time.desc");
         ImGui::Spacing();
     }
 
@@ -341,6 +357,7 @@ void MenuWindow::FeaturesTab::RenderCameraStateManager() {
             ImGui::EndDisabled();
 
             ImGui::PopItemWidth();
+            SectionDesc("Camera State Manager.desc");
             ImGui::Spacing();
         }
         ImGui::EndDisabled();
@@ -385,6 +402,7 @@ void MenuWindow::FeaturesTab::RenderPathRecorder() {
             ImGui::EndDisabled();
 
             ImGui::PopItemWidth();
+            SectionDesc("Path recorder.desc");
             ImGui::Spacing();
         }
         ImGui::EndDisabled();
@@ -394,6 +412,8 @@ void MenuWindow::FeaturesTab::RenderPathRecorder() {
 void MenuWindow::FeaturesTab::Render() {
     if (ImGui::BeginTabItem(I18N::TR("Features"))) {
         ImGui::BeginScrollableArea("##features_content");
+
+        SectionDesc("FeaturesTab.desc");
 
         RenderSpeedhack();
         RenderCycleWeatherTime();
@@ -419,10 +439,13 @@ void MenuWindow::SequencerTab::Render() {
     if (ImGui::BeginTabItem(I18N::TR("Sequencer"))) {
         ImGui::BeginScrollableArea("##sequencer_content");
 
+        SectionDesc("Sequencer.desc");
+
         bool isVisible = timelineWindow.IsVisible();
         if (ImGui::Checkbox(I18N::TR("Show timeline"), &isVisible)) {
             timelineWindow.SetVisibility(isVisible);
         }
+        ImHelpers::Tooltip(I18N::TR("Show timeline.desc"));
 
         float max_time = timeline.GetMaxTime();
         if (ImGui::DragFloat(I18N::TR("Timeline lenght"), &max_time, 1, 16.0f, 3600.0f, "%.f sec")) {
@@ -431,15 +454,20 @@ void MenuWindow::SequencerTab::Render() {
 
         ImGui::Spacing();
         ImGui::SeparatorText(I18N::TR("Interpolation type"));
+        SectionDesc("Interpolation type.desc");
 
         DrawCombo(I18N::TR("FOV##interp"), timeline.GetFovTrack());
+        ImHelpers::Tooltip(I18N::TR("Interpolation type.desc"));
         DrawCombo(I18N::TR("Position##interp"), timeline.GetPosTrack());
+        ImHelpers::Tooltip(I18N::TR("Interpolation type.desc"));
         DrawCombo(I18N::TR("Rotation##interp"), timeline.GetRotTrack());
+        ImHelpers::Tooltip(I18N::TR("Interpolation type.desc"));
 
         TimelineConfig& timeline_cfg = timelineWindow.GetConfig();
 
         ImGui::Spacing();
         ImGui::SeparatorText(I18N::TR("Timeline"));
+        SectionDesc("Timeline.desc");
 
         ImGui::DragInt(I18N::TR("Pixels per Second"), &timeline_cfg.pixels_per_second, 1, timeline_cfg.GetMinPixelsPerSecond(max_time), 1000);
         ImGui::DragInt(I18N::TR("Sidebar Width"), &timeline_cfg.sidebar_width, 1, 50, 1000);
@@ -541,14 +569,7 @@ void MenuWindow::ConfigTab::Render() {
 
                 // 分节底部：通俗易懂的功能说明（绿色小字）
                 const std::string descKey = section + ".desc";
-                if (I18N::IsChineseReady() && I18N::Has(descKey.c_str())) {
-                    ImGui::Spacing();
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.42f, 0.78f, 0.45f, 1.0f));
-                    ImGui::SetWindowFontScale(0.85f);
-                    ImGui::TextWrapped("%s", I18N::TR(descKey.c_str()));
-                    ImGui::SetWindowFontScale(1.0f);
-                    ImGui::PopStyleColor();
-                }
+                SectionDesc(descKey.c_str());
             }
 
             ImGui::PopID();
