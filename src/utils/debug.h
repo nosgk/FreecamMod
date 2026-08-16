@@ -37,7 +37,7 @@ public:
         return p ? p + 1 : path;
     }
 
-    static inline std::vector<std::string> GetLogLines() { return logLines; }
+    static inline const std::vector<std::string>& GetLogLines() { return logLines; }
 
 private:
     static void Print(const char* level, const char* fmt, va_list args);

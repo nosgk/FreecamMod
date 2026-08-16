@@ -18,4 +18,7 @@ namespace I18N {
 
     // ConVar 翻译：优先查 "<section>.<name>" 复合键，其次裸 name，最后回退 name
     const char* TR(const char* section, const char* name);
+
+    // 键是否存在（用于可选文本，如分节说明）
+    bool Has(const char* key);
 }

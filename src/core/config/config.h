@@ -4,6 +4,7 @@
 #include <optional>
 #include <functional>
 #include <array>
+#include <cstdint>
 
 #include "mini/ini.h"
 
@@ -35,17 +36,26 @@ public:
 
     bool GetKeybindString(const Keybind& keybind, std::string* string);
 
-	std::string GetKeybindString(ActionType actionType) {
-		for (const Keybind& keybind : keybinds) {
-			if (keybind.defaultAction.GetType() == actionType) {
-				std::string keybindStr{};
-				if (GetKeybindString(keybind, &keybindStr)) {
-					return keybindStr;
-				}
-			}
-		}
-		return "";
-	}
+    // 配置代数：每次 Reload 递增，供 UI 侧缓存失效判断
+    uint32_t iniGeneration = 0;
+
+    // 带缓存的按键字符串查询（keybinds 下标与 ActionType 一致，见 ValidateKeybindOrder）
+    const std::string& GetKeybindString(ActionType actionType) {
+        if (keybindStrCacheGen != iniGeneration) {
+            keybindStrCacheGen = iniGeneration;
+            keybindStrCacheValid.fill(false);
+        }
+        const size_t idx = static_cast<size_t>(actionType);
+        if (!keybindStrCacheValid[idx]) {
+            std::string s;
+            if (GetKeybindString(keybinds[idx], &s))
+                keybindStrCache[idx] = std::move(s);
+            else
+                keybindStrCache[idx].clear();
+            keybindStrCacheValid[idx] = true;
+        }
+        return keybindStrCache[idx];
+    }
 
 private:
     ActionManager* actionMgr = nullptr;
@@ -53,6 +63,11 @@ private:
 
     std::optional<mINI::INIFile> file{};
     mINI::INIStructure ini;
+
+    // GetKeybindString(ActionType) 的缓存
+    std::array<std::string, static_cast<size_t>(ActionType::Count)> keybindStrCache{};
+    std::array<bool, static_cast<size_t>(ActionType::Count)> keybindStrCacheValid{};
+    uint32_t keybindStrCacheGen = 0;
 
     std::filesystem::path dllPath;
     std::filesystem::path modDirectoryPath;

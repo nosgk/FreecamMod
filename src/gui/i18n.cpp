@@ -1,5 +1,6 @@
 #include "gui/i18n.h"
 
+#include <cstring>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -150,6 +151,58 @@ namespace I18N {
         }
 
         // ---- 中文字体加载：模组字体 -> DLL 同目录 -> 系统微软雅黑 ----
+
+        // 将 UTF-8 字符串中的全部码点加入字形构建器
+        void AddUtf8StringToBuilder(ImFontGlyphRangesBuilder& builder, const std::string& s) {
+            size_t i = 0;
+            while (i < s.size()) {
+                unsigned char c = (unsigned char)s[i];
+                unsigned cp = 0;
+                size_t len = 0;
+                if (c < 0x80) { cp = c; len = 1; }
+                else if ((c & 0xE0) == 0xC0) { cp = c & 0x1Fu; len = 2; }
+                else if ((c & 0xF0) == 0xE0) { cp = c & 0x0Fu; len = 3; }
+                else if ((c & 0xF8) == 0xF0) { cp = c & 0x07u; len = 4; }
+                else { ++i; continue; } // 非法字节，跳过
+
+                if (i + len > s.size()) break;
+                for (size_t k = 1; k < len; ++k)
+                    cp = (cp << 6) | ((unsigned char)s[i + k] & 0x3Fu);
+
+                if (cp < 0x10000) // ImWchar 为 16 位
+                    builder.AddChar((ImWchar)cp);
+                i += len;
+            }
+        }
+
+        // 字形范围必须存活到 io.Fonts->Build()，故声明为静态
+        ImVector<ImWchar> g_glyphRanges;
+
+        // 字体数据：静态存储，存活至进程结束（atlas 不接管所有权）
+        std::vector<char> g_fontData;
+
+        // 通过 std::filesystem::path 读取文件（宽路径，不经 ANSI 转换），
+        // 支持含中文/emoji 等任意字符的安装目录名
+        bool ReadFileToBuffer(const std::filesystem::path& path, std::vector<char>& out) {
+            std::ifstream file(path, std::ios::binary);
+            if (!file) return false;
+            file.seekg(0, std::ios::end);
+            const auto size = file.tellg();
+            if (size <= 0) return false;
+            file.seekg(0, std::ios::beg);
+            out.resize(static_cast<size_t>(size));
+            return static_cast<bool>(file.read(out.data(), size));
+        }
+
+        // 检查 sfnt 魔数：TrueType(00 01 00 00)/true/ttc 集合；
+        // 排除 OTTO（CFF 轮廓，stb_truetype 不支持）
+        bool IsSupportedFont(const char* data, size_t size) {
+            if (size < 4) return false;
+            return memcmp(data, "\x00\x01\x00\x00", 4) == 0
+                || memcmp(data, "true", 4) == 0
+                || memcmp(data, "ttcf", 4) == 0;
+        }
+
         bool LoadChineseFont(const std::filesystem::path& configDir) {
             ImGuiIO& io = ImGui::GetIO();
 
@@ -165,21 +218,44 @@ namespace I18N {
             ImFontConfig fontConfig;
             fontConfig.OversampleH = 2;
             fontConfig.OversampleV = 2;
+            fontConfig.FontDataOwnedByAtlas = false; // 数据由 g_fontData 持有
 
-            const ImWchar* glyphRanges = io.Fonts->GetGlyphRangesChineseSimplifiedCommon();
+            // 字形范围 = ASCII + 常用简体字兜底 + 映射表中实际用到的所有字符。
+            // 「常用 2500 字」不含"帧/轴/弧"等字，若不加映射表字符会显示为 '?'
+            ImFontGlyphRangesBuilder builder;
+            builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
+            builder.AddRanges(io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+            if (g_mapLoaded) {
+                for (const auto& [key, value] : g_map) {
+                    AddUtf8StringToBuilder(builder, value);
+                    AddUtf8StringToBuilder(builder, key);
+                }
+            }
+            builder.BuildRanges(&g_glyphRanges);
+            const ImWchar* glyphRanges = g_glyphRanges.Data;
 
             for (const auto& path : candidates) {
                 std::error_code ec;
                 if (!std::filesystem::exists(path, ec) || ec) continue;
 
-                const std::string fontPathStr = path.string();
-                ImFont* font = io.Fonts->AddFontFromFileTTF(fontPathStr.c_str(), fontSize, &fontConfig, glyphRanges);
+                // 宽路径读入内存后注册，规避 AddFontFromFileTTF 的窄字符 fopen
+                // 在含特殊字符目录名下打开失败的问题
+                if (!ReadFileToBuffer(path, g_fontData)) {
+                    LOG_WARN("Failed to read font file: %s", path.string().c_str());
+                    continue;
+                }
+                if (!IsSupportedFont(g_fontData.data(), g_fontData.size())) {
+                    LOG_WARN("Unsupported font format (CFF/OTF outlines not supported): %s", path.string().c_str());
+                    continue;
+                }
+
+                ImFont* font = io.Fonts->AddFontFromMemoryTTF(g_fontData.data(), (int)g_fontData.size(), fontSize, &fontConfig, glyphRanges);
                 if (font) {
                     g_fontLoaded = true;
-                    LOG_INFO("Chinese font loaded: %s", fontPathStr.c_str());
+                    LOG_INFO("Chinese font loaded: %s (%d bytes)", path.string().c_str(), (int)g_fontData.size());
                     return true;
                 }
-                LOG_WARN("Failed to load font file: %s", fontPathStr.c_str());
+                LOG_WARN("Failed to add font: %s", path.string().c_str());
             }
 
             LOG_WARN("No Chinese font available, GUI falls back to English");
@@ -220,5 +296,10 @@ namespace I18N {
         }
         auto it = g_map.find(name);
         return it != g_map.end() ? it->second.c_str() : name;
+    }
+
+    bool Has(const char* key) {
+        if (!g_mapLoaded) return false;
+        return g_map.find(key) != g_map.end();
     }
 }

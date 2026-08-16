@@ -1,5 +1,6 @@
 #include "gui/menu_window.h"
 
+#include <cstdint>
 #include <format>
 #include "shellapi.h"
 
@@ -42,7 +43,8 @@ void MenuWindow::Render() {
     if (!is_visible) return;
 
     ImGui::SetNextWindowSize(ImVec2(420, 360), ImGuiCond_FirstUseEver);
-    ImGui::Begin(I18N::TR("window.title"), &is_visible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    // NoDocking：禁止吸附到停靠区，保证窗口可自由拖动移动
+    ImGui::Begin(I18N::TR("window.title"), &is_visible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDocking);
 
     if (ImGui::BeginTabBar("##tabs")) {
         infoTab.Render();
@@ -176,7 +178,9 @@ void MenuWindow::InfoTab::Render() {
         if (ImGui::DragFloat(I18N::TR("Speed"), &speed, 0.1f, 0.0f, 0.0f, "%.2f")) {
             freeCamera.SetSpeed(speed);
         }
-		ImHelpers::TooltipWithShortcut(I18N::TR("Adjust camera fly speed."), std::format("{} + Scroll", cfg.GetKeybindString(ActionType::ScrollCameraSpeedModifier).c_str()).c_str());
+        if (ImGui::IsItemHovered()) {
+            ImHelpers::TooltipWithShortcut(I18N::TR("Adjust camera fly speed."), std::format("{} + Scroll", cfg.GetKeybindString(ActionType::ScrollCameraSpeedModifier)).c_str());
+        }
         ImGui::EndDisabled();
 
         ImGui::Spacing();
@@ -220,7 +224,7 @@ void MenuWindow::FeaturesTab::RenderSpeedhack() {
                     I18N::TR("Disabled by config: features_work_only_in_freecam.speedhack\nEnable this option or turn on freecam mode to unlock."));
             }
             else {
-				ImHelpers::TooltipWithShortcut(I18N::TR("Enable/disable speedhack."), std::format("{}", cfg.GetKeybindString(ActionType::ToggleSpeedhack).c_str()).c_str());
+				ImHelpers::TooltipWithShortcut(I18N::TR("Enable/disable speedhack."), cfg.GetKeybindString(ActionType::ToggleSpeedhack).c_str());
             }
         }
         ImGui::EndDisabled();
@@ -229,7 +233,9 @@ void MenuWindow::FeaturesTab::RenderSpeedhack() {
         if (ImGui::DragFloat(I18N::TR("Speedhack speed"), &timeScale, 0.001)) {
             speedhack.SetSpeed(timeScale);
         }
-		ImHelpers::TooltipWithShortcut(I18N::TR("Adjust speedhack speed."), std::format("{} + Scroll", cfg.GetKeybindString(ActionType::ScrollSpeedhackModifier).c_str()).c_str());
+        if (ImGui::IsItemHovered()) {
+            ImHelpers::TooltipWithShortcut(I18N::TR("Adjust speedhack speed."), std::format("{} + Scroll", cfg.GetKeybindString(ActionType::ScrollSpeedhackModifier)).c_str());
+        }
 
         float gameSpeed = speedhack.GetGameSpeed();
         ImGui::BeginDisabled();
@@ -257,7 +263,7 @@ void MenuWindow::FeaturesTab::RenderFrameStepper() {
         if (ImGui::Button(canStopStepping ? I18N::TR("Stop stepping") : I18N::TR("Step frames"), ImVec2(Layout::SMALL_BUTTON_WIDTH, 0.0f))) {
             canStopStepping ? frameStepper.Reset() : frameStepper.StepFrames();
         }
-		ImHelpers::TooltipWithShortcut(I18N::TR("Step frames forward."), std::format("{}", cfg.GetKeybindString(ActionType::StepFrames).c_str()).c_str());
+		ImHelpers::TooltipWithShortcut(I18N::TR("Step frames forward."), cfg.GetKeybindString(ActionType::StepFrames).c_str());
         ImGui::EndDisabled();
 
         if (ImGui::InputInt(I18N::TR("Step"), &step)) {
@@ -286,7 +292,7 @@ void MenuWindow::FeaturesTab::RenderCycleWeatherTime() {
                     I18N::TR("Disabled by config: features_work_only_in_freecam.cycle_weather_time\nEnable this option or turn on freecam mode to unlock."));
             }
             else {
-				ImHelpers::TooltipWithShortcut(I18N::TR("Start/stop cycling weather and time."), std::format("{}", cfg.GetKeybindString(ActionType::CycleWeatherTime).c_str()).c_str());
+				ImHelpers::TooltipWithShortcut(I18N::TR("Start/stop cycling weather and time."), cfg.GetKeybindString(ActionType::CycleWeatherTime).c_str());
             }
         }
         ImGui::EndDisabled();
@@ -362,7 +368,7 @@ void MenuWindow::FeaturesTab::RenderPathRecorder() {
             if (ImGui::Button(pathRecorder.IsRecording() ? I18N::TR("Stop Recording") : I18N::TR("Start Recording"), ImVec2(Layout::BUTTON_WIDTH, 0.0f))) {
                 pathRecorder.IsRecording() ? pathRecorder.EndRecord() : pathRecorder.StartRecord();
             }
-			ImHelpers::TooltipWithShortcut(I18N::TR("Start/stop recording camera path."), std::format("{}", cfg.GetKeybindString(ActionType::StartEndRecording).c_str()).c_str());
+			ImHelpers::TooltipWithShortcut(I18N::TR("Start/stop recording camera path."), cfg.GetKeybindString(ActionType::StartEndRecording).c_str());
 
             int framesPlayed = pathRecorder.GetFramesPlayed();
             ImGui::BeginDisabled();
@@ -375,7 +381,7 @@ void MenuWindow::FeaturesTab::RenderPathRecorder() {
             if (ImGui::Button(pathRecorder.IsPlaying() ? I18N::TR("Stop Playing") : I18N::TR("Start Playing"), ImVec2(Layout::BUTTON_WIDTH, 0.0f))) {
                 pathRecorder.IsPlaying() ? pathRecorder.EndPlay() : pathRecorder.StartPlay();
             }
-			ImHelpers::TooltipWithShortcut(I18N::TR("Start/stop playing recorded camera path."), std::format("{}", cfg.GetKeybindString(ActionType::StartEndPlayingRecording).c_str()).c_str());
+			ImHelpers::TooltipWithShortcut(I18N::TR("Start/stop playing recorded camera path."), cfg.GetKeybindString(ActionType::StartEndPlayingRecording).c_str());
             ImGui::EndDisabled();
 
             ImGui::PopItemWidth();
@@ -448,10 +454,22 @@ void MenuWindow::SequencerTab::Render() {
 
         ImGui::Spacing();
         ImGui::SeparatorText(I18N::TR("Controls"));
-        ImGui::Text("%s", std::format("[{}]", cfg.GetKeybindString(ActionType::TimelinePlayPause).c_str()).c_str()); ImGui::SameLine(); ImGui::TextDisabled("%s", I18N::TR("- Play/Pause")); ImGui::SameLine(); ImGui::TextDisabled("(?)"); ImHelpers::Tooltip(I18N::TR("Rebindable in config.ini"));
-		ImGui::Text("%s", std::format("[{}]", cfg.GetKeybindString(ActionType::TimelineAddAllKeyframes).c_str()).c_str()); ImGui::SameLine(); ImGui::TextDisabled("%s", I18N::TR("- Add all keyframes")); ImGui::SameLine(); ImGui::TextDisabled("(?)"); ImHelpers::Tooltip(I18N::TR("Rebindable in config.ini"));
-		ImGui::Text("%s", std::format("[{}]", cfg.GetKeybindString(ActionType::TimelineDeleteSelectedKeyframes).c_str()).c_str()); ImGui::SameLine(); ImGui::TextDisabled("%s", I18N::TR("- Delete selected keyframes")); ImGui::SameLine(); ImGui::TextDisabled("(?)"); ImHelpers::Tooltip(I18N::TR("Rebindable in config.ini"));
-        ImGui::Text("%s", std::format("[{}]", cfg.GetKeybindString(ActionType::TimelineSelectAllKeyframes).c_str()).c_str()); ImGui::SameLine(); ImGui::TextDisabled("%s", I18N::TR("- Select all keyframes")); ImGui::SameLine(); ImGui::TextDisabled("(?)"); ImHelpers::Tooltip(I18N::TR("Rebindable in config.ini"));
+
+        // 快捷键串仅在配置重载后重建，避免每帧堆分配
+        static std::string playPauseStr, addAllStr, delSelStr, selAllStr;
+        static uint32_t cacheGen = 0;
+        if (cacheGen != cfg.iniGeneration) {
+            playPauseStr = std::format("[{}]", cfg.GetKeybindString(ActionType::TimelinePlayPause));
+            addAllStr = std::format("[{}]", cfg.GetKeybindString(ActionType::TimelineAddAllKeyframes));
+            delSelStr = std::format("[{}]", cfg.GetKeybindString(ActionType::TimelineDeleteSelectedKeyframes));
+            selAllStr = std::format("[{}]", cfg.GetKeybindString(ActionType::TimelineSelectAllKeyframes));
+            cacheGen = cfg.iniGeneration;
+        }
+
+        ImGui::TextUnformatted(playPauseStr.c_str()); ImGui::SameLine(); ImGui::TextDisabled("%s", I18N::TR("- Play/Pause")); ImGui::SameLine(); ImGui::TextDisabled("(?)"); ImHelpers::Tooltip(I18N::TR("Rebindable in config.ini"));
+        ImGui::TextUnformatted(addAllStr.c_str()); ImGui::SameLine(); ImGui::TextDisabled("%s", I18N::TR("- Add all keyframes")); ImGui::SameLine(); ImGui::TextDisabled("(?)"); ImHelpers::Tooltip(I18N::TR("Rebindable in config.ini"));
+        ImGui::TextUnformatted(delSelStr.c_str()); ImGui::SameLine(); ImGui::TextDisabled("%s", I18N::TR("- Delete selected keyframes")); ImGui::SameLine(); ImGui::TextDisabled("(?)"); ImHelpers::Tooltip(I18N::TR("Rebindable in config.ini"));
+        ImGui::TextUnformatted(selAllStr.c_str()); ImGui::SameLine(); ImGui::TextDisabled("%s", I18N::TR("- Select all keyframes")); ImGui::SameLine(); ImGui::TextDisabled("(?)"); ImHelpers::Tooltip(I18N::TR("Rebindable in config.ini"));
 		ImGui::Text("[Ctrl + Scroll]"); ImGui::SameLine(); ImGui::TextDisabled("%s", I18N::TR("- Zoom timeline"));
         ImGui::Text("[Shift + Scroll]"); ImGui::SameLine(); ImGui::TextDisabled("%s", I18N::TR("- Scroll timeline"));
         ImGui::TextDisabled("%s", I18N::TR("Hold")); ImGui::SameLine(); ImGui::Text("[RMB]"); ImGui::SameLine(); ImGui::TextDisabled("%s", I18N::TR("in game area to look around"));
@@ -520,6 +538,17 @@ void MenuWindow::ConfigTab::Render() {
                     ImGui::PopID();
                 }
                 ImGui::PopItemWidth();
+
+                // 分节底部：通俗易懂的功能说明（绿色小字）
+                const std::string descKey = section + ".desc";
+                if (I18N::IsChineseReady() && I18N::Has(descKey.c_str())) {
+                    ImGui::Spacing();
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.42f, 0.78f, 0.45f, 1.0f));
+                    ImGui::SetWindowFontScale(0.85f);
+                    ImGui::TextWrapped("%s", I18N::TR(descKey.c_str()));
+                    ImGui::SetWindowFontScale(1.0f);
+                    ImGui::PopStyleColor();
+                }
             }
 
             ImGui::PopID();
@@ -596,7 +625,6 @@ void MenuWindow::LogTab::Render() {
         ImGui::BeginChild("##log_scroll", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
         const auto& lines = Logger::GetLogLines();
-
         ImGuiListClipper clipper;
         clipper.Begin((int)lines.size());
 

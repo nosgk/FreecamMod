@@ -41,6 +41,7 @@ void Config::Reload() {
 
     ini.clear();
     bool fileExists = file->read(ini);
+    ++iniGeneration;
 
     for (auto* conVar : IConVar::allConVars) {
         UpdateConVar(conVar);
