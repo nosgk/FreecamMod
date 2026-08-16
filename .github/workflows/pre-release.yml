@@ -7,8 +7,6 @@ env:
   project_name: Freecam
 
 on:
-  push:
-    branches: [ pre-release ]
   workflow_dispatch:
 
 jobs:

@@ -7,9 +7,6 @@ env:
   project_name: Freecam
 
 on:
-  push:
-    branches: [ master ]
-    tags: [ "v*" ]
   workflow_dispatch:
 
 jobs:
