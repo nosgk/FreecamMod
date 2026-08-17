@@ -64,6 +64,7 @@ cmake --build build --config Release
 编译生成的 DLL 位于：`build/Release/FreecamMod.dll`
 
 ## 致谢与参考
+[Logersnamed/FreecamMod](https://github.com/Logersnamed/FreecamMod) - 爱来自Logersnamed
 [EROverlay](https://github.com/koalabear420/EROverlay) – 参考并使用了部分代码
 [EldenRing-PostureBarMod](https://github.com/Mordrog/EldenRing-PostureBarMod) – 参考
 [DX12 ImGui Overlay](https://github.com/kacejot/dx12-imgui-overlay) – 参考
