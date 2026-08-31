@@ -39,14 +39,26 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${I18N_ASSETS} $<TARGET_FILE_DIR:${PROJECT_NAME}>
 )
 
-set(GAME_DIR "" CACHE PATH "Path to game folder")
-if(GAME_DIR)
+set(DLL_OUTPUT_DIR "" CACHE PATH "Directory to copy the built DLL to (e.g. mods folder)")
+if(DLL_OUTPUT_DIR)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:${PROJECT_NAME}>
-        "${GAME_DIR}"
+        "${DLL_OUTPUT_DIR}"
     )
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${I18N_ASSETS} "${GAME_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${I18N_ASSETS} "${DLL_OUTPUT_DIR}"
     )
 endif()
+
+add_custom_target(GenerateBuildInfoHeader ALL
+    COMMAND ${CMAKE_COMMAND}
+        -DSRC_DIR=${CMAKE_SOURCE_DIR}
+        -DDST_DIR=${CMAKE_BINARY_DIR}/generated
+        -P ${CMAKE_SOURCE_DIR}/cmake/generate_build_info.cmake
+    BYPRODUCTS ${CMAKE_BINARY_DIR}/generated/build_info.h
+    COMMENT "Generating build_info.h"
+)
+
+add_dependencies(${PROJECT_NAME} GenerateBuildInfoHeader)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/generated)

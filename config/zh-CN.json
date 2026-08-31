@@ -1,8 +1,8 @@
 {
   "_说明": "FreecamMod 中文汉化映射表（zh-CN）。键为程序内英文原文，值为简体中文译文。ConVar 配置项使用 \"段落.键名\" 复合键。修改后重启游戏生效。",
 
-  "window.title": "Freecam 自由视角 v1.20.1-cn.1",
-  "About.version": "v1.20.1-cn.1",
+  "Freecam": "Freecam 自由视角",
+  "Freecam %s, commit: %s": "自由视角 %s，提交：%s",
   "Info": "信息",
   "Features": "功能",
   "Sequencer": "关键帧动画",
@@ -193,6 +193,8 @@
   "game_options.hide_hud": "自由视角时隐藏 HUD",
   "game_options.disable_anti_aliasing": "自由视角时禁用抗锯齿",
   "game_options.disable_motion_blur": "自由视角时禁用动态模糊",
+  "game_options.remove_vignette": "自由视角时移除暗角",
+  "game_options.remove_chromatic_aberration": "自由视角时移除色差",
 
   "camera_settings.sensitivity": "鼠标灵敏度",
   "camera_settings.default_speed": "默认移动速度",
@@ -235,7 +237,7 @@
   "hidden.freeze_by_setting_zero_speed": "以零速度方式冻结",
 
   "freecam.desc": "自由视角的核心开关：开启后镜头与角色分离，可分别冻结游戏世界、周围实体和玩家角色，并禁用玩家输入，防止拍摄时角色乱动。",
-  "game_options.desc": "进入自由视角时临时改变的游戏画面选项（如隐藏 HUD、关闭动态模糊），关闭自由视角后会自动恢复原样，不影响日常游玩。",
+  "game_options.desc": "进入自由视角时临时改变的游戏画面选项（如隐藏 HUD、关闭动态模糊、移除暗角与色差），关闭自由视角后会自动恢复原样，不影响日常游玩。",
   "camera_settings.desc": "摄像机的基础手感参数：鼠标灵敏度、飞行速度、加速倍率、视野(FOV)范围与俯仰限制等。注意所有角度均使用弧度制。",
   "smooth_camera_settings.desc": "电影感平滑模式：让镜头的移动和旋转带惯性缓冲，松手后缓缓停下，运镜更顺滑，适合拍摄长镜头。",
   "frame_stepper.desc": "逐帧播放：游戏冻结时每按一次步进键，世界就恢复运行指定帧数后再次定格，方便精确捕捉某一瞬间画面。",

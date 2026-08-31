@@ -50,12 +50,12 @@
 ## 编译
 ### 使用 CMake
 ```bash
-git clone --recurse-submodule https://github.com/Logersnamed/FreecamMod.git
+git clone --recurse-submodules https://github.com/Logersnamed/FreecamMod.git
 cd FreecamMod
 ```
-配置项目。可以选择通过 DGAME_DIR 变量指定 DLL 输出目录：
+配置项目。可以选择通过 DLL_OUTPUT_DIR 变量指定 DLL 输出目录：
 ```bash
-cmake -S . -B build -G "Visual Studio 17 2022" [-DGAME_DIR="path/to/modflolder/"]
+cmake -S . -B build -G "Visual Studio 17 2022" [-DDLL_OUTPUT_DIR="path/to/modfolder/"]
 ```
 构建项目：
 ```bash
@@ -70,6 +70,7 @@ cmake --build build --config Release
 [DX12 ImGui Overlay](https://github.com/kacejot/dx12-imgui-overlay) – 参考  
 [Techiew ModUtils](https://github.com/techiew/EldenRingMods/blob/master/ModUtils.h) - 艾尔登法环模组工具库  
 [Techiew EldenRingMods](https://github.com/techiew/EldenRingMods) - 参考并使用了部分代码  
+[fromsoftware-rs](https://github.com/vswarte/fromsoftware-rs) - Rust 绑定  
 [The Grand Archives](https://github.com/The-Grand-Archives/Elden-Ring-CT-TGA) - 联机修改表  
 [Elden Ring Ultimate Cheat Engine Table](https://www.nexusmods.com/eldenring/mods/48) - 联机修改表  
 [Universal-WndProc-Hook](https://github.com/M0rtale/Universal-WndProc-Hook) – WndProc 钩子库  

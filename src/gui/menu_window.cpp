@@ -2,10 +2,12 @@
 
 #include <cstdint>
 #include <format>
+#include <string>
 #include "shellapi.h"
 
 #include "imgui.h"
 
+#include "build_info.h"
 #include "core/config/config.h"
 #include "core/free_camera.h"
 #include "core/features/speedhack.h"
@@ -56,8 +58,9 @@ void MenuWindow::Render() {
     if (!is_visible) return;
 
     ImGui::SetNextWindowSize(ImVec2(420, 360), ImGuiCond_FirstUseEver);
+    // 标题动态跟随上游版本号；###freecam 固定窗口 ID，避免版本变化导致布局丢失
     // NoDocking：禁止吸附到停靠区，保证窗口可自由拖动移动
-    ImGui::Begin(I18N::TR("window.title"), &is_visible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDocking);
+    ImGui::Begin((std::string(I18N::TR("Freecam")) + " " + MOD_VERSION + "###freecam").c_str(), &is_visible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDocking);
 
     if (ImGui::BeginTabBar("##tabs")) {
         infoTab.Render();
@@ -87,7 +90,7 @@ void MenuWindow::InfoTab::Render() {
             ImGui::Spacing();
             ImGui::SeparatorText(I18N::TR("About"));
 
-            ImGui::BulletText("Freecam %s", I18N::TR("About.version"));
+            ImGui::BulletText(I18N::TR("Freecam %s, commit: %s"), MOD_VERSION, MOD_GIT_HASH);
             ImGui::BulletText(I18N::TR("Build date: %s"), __DATE__);
 
             ImGui::BulletText("%s", I18N::TR("Wiki & docs: "));
